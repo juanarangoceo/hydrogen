@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: isSSR ? 'dist/server' : 'dist/client',
       rollupOptions: {
-        input: isSSR ? './src/entry-server.jsx' : './src/entry-client.jsx',
+        input: isSSR ? './app/entry.server.jsx' : './app/entry.client.jsx',
       },
     },
     server: {
