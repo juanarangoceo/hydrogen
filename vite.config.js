@@ -8,22 +8,16 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [hydrogen(), tsconfigPaths()],
     build: {
-      outDir: 'build', // Unifica la salida en el directorio "build"
+      outDir: isSSR ? 'dist/server' : 'public',
       rollupOptions: {
         input: isSSR ? './app/entry.server.jsx' : './app/entry.client.jsx',
       },
     },
     server: {
       port: 3000,
-      hmr: {
-        protocol: 'ws',
-      },
-    },
-    optimizeDeps: {
-      include: ['react', 'react-dom'],
     },
     ssr: {
-      noExternal: ['@shopify/hydrogen'], // Evita errores al procesar Hydrogen
-    },
+      noExternal: ['@shopify/hydrogen']
+    }
   };
 });
