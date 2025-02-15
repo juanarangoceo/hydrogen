@@ -1,6 +1,6 @@
-import {Await, useLoaderData, Link} from '@remix-run/react';
-import {Suspense} from 'react';
-import {Image, Money} from '@shopify/hydrogen';
+import { Await, useLoaderData, Link } from '@remix-run/react';
+import { Suspense } from 'react';
+import { Image, Money } from '@shopify/hydrogen';
 import HeroSection from '../components/HeroSection';
 import FeaturedCollection from '../components/FeaturedCollection';
 
@@ -8,41 +8,40 @@ import FeaturedCollection from '../components/FeaturedCollection';
  * @type {MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Hydrogen | Home'}];
+  return [{ title: 'Hydrogen | Home' }];
 };
 
 export async function loader(args) {
-  const deferredData = loadDeferredData(args);
+  const deferredData = await loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  return {...deferredData, ...criticalData};
+  return { ...deferredData, ...criticalData };
 }
 
-async function loadCriticalData({context}) {
-  const data = await context.storefront.query(FEATURED_COLLECTION_QUERY);
+async function loadCriticalData({ context }) {
+  try {
+    const data = await context.storefront.query(FEATURED_COLLECTION_QUERY);
+    console.log('Resultado de la consulta:', data); // Depuración
 
-  console.log('Resultado de la consulta:', data); // Depuración para ver si devuelve datos
+    if (!data?.collections?.nodes?.length) {
+      console.error('No se encontraron colecciones destacadas.');
+      return { featuredCollection: null };
+    }
 
-  if (!data || !data.collections || data.collections.nodes.length === 0) {
-    console.error('No se encontraron colecciones destacadas.');
-    return {featuredCollection: null};
+    return { featuredCollection: data.collections.nodes[0] };
+  } catch (error) {
+    console.error('Error al cargar datos críticos:', error);
+    return { featuredCollection: null };
   }
-
-  return {
-    featuredCollection: data.collections.nodes[0],
-  };
 }
 
-function loadDeferredData({context}) {
-  const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
-
-  return {
-    recommendedProducts,
-  };
+async function loadDeferredData({ context }) {
+  try {
+    const recommendedProducts = await context.storefront.query(RECOMMENDED_PRODUCTS_QUERY);
+    return { recommendedProducts };
+  } catch (error) {
+    console.error('Error al cargar productos recomendados:', error);
+    return { recommendedProducts: null };
+  }
 }
 
 export default function Homepage() {
@@ -57,8 +56,8 @@ export default function Homepage() {
   );
 }
 
-function RecommendedProducts({products}) {
-  if (!products || !products.nodes || products.nodes.length === 0) {
+function RecommendedProducts({ products }) {
+  if (!products?.nodes?.length) {
     return <p>No se encontraron productos recomendados.</p>;
   }
 
@@ -73,7 +72,9 @@ function RecommendedProducts({products}) {
                 <Link key={product.id} className="recommended-product" to={`/products/${product.handle}`}>
                   <Image data={product.images.nodes[0]} aspectRatio="1/1" sizes="(min-width: 45em) 20vw, 50vw" />
                   <h4>{product.title}</h4>
-                  <small><Money data={product.priceRange.minVariantPrice} /></small>
+                  <small>
+                    <Money data={product.priceRange.minVariantPrice} />
+                  </small>
                 </Link>
               ))}
             </div>
@@ -103,31 +104,27 @@ const FEATURED_COLLECTION_QUERY = `
 `;
 
 const RECOMMENDED_PRODUCTS_QUERY = `
-  fragment RecommendedProduct on Product {
-    id
-    title
-    handle
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-    images(first: 1) {
-      nodes {
-        id
-        url
-        altText
-        width
-        height
-      }
-    }
-  }
-
   query RecommendedProducts {
     products(first: 4, sortKey: UPDATED_AT, reverse: true) {
       nodes {
-        ...RecommendedProduct
+        id
+        title
+        handle
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
+        images(first: 1) {
+          nodes {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
       }
     }
   }
