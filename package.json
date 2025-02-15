@@ -5,12 +5,10 @@
   "version": "2025.1.1",
   "type": "module",
   "scripts": {
-    "build": "shopify hydrogen build --codegen",
-    "dev": "shopify hydrogen dev --codegen",
-    "preview": "shopify hydrogen preview --build",
-    "lint": "eslint --no-error-on-unmatched-pattern .",
-    "codegen": "shopify hydrogen codegen"
-  },
+  "build:client": "vite build",
+  "build:server": "vite build --mode ssr",
+  "build": "npm run build:client && npm run build:server"
+},
   "prettier": "@shopify/prettier-config",
   "dependencies": {
     "@remix-run/react": "^2.15.3",
