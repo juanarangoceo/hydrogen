@@ -1,20 +1,26 @@
-import express from 'express';
-import { createRequestHandler } from '@remix-run/express';
+// Virtual entry point for the app
 import * as remixBuild from 'virtual:remix/server-build';
+import { createRequestHandler } from '@shopify/remix-oxygen';
+import { createAppLoadContext } from '~/lib/context';
 
-const app = express();
+/**
+ * Export a fetch handler in module format.
+ */
+export default {
+  async fetch(request, env, executionContext) {
+    try {
+      const appLoadContext = await createAppLoadContext(request, env, executionContext);
 
-app.use(express.static('public')); // Archivos estáticos
+      const handleRequest = createRequestHandler({
+        build: remixBuild,
+        mode: process.env.NODE_ENV,
+        getLoadContext: () => appLoadContext,
+      });
 
-app.all(
-  '*',
-  createRequestHandler({
-    build: remixBuild,
-    mode: process.env.NODE_ENV,
-  })
-);
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+      return handleRequest(request);
+    } catch (error) {
+      console.error('Error in server.js:', error);
+      return new Response('Internal Server Error', { status: 500 });
+    }
+  },
+};
