@@ -1,10 +1,3 @@
-import { defineConfig } from 'vite';
-import { hydrogen } from '@shopify/hydrogen/vite';
-import { oxygen } from '@shopify/mini-oxygen/vite';
-import { vitePlugin as remix } from '@remix-run/dev';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import tailwindcss from '@tailwindcss/vite';
-
 export default defineConfig(({ mode }) => {
   const isSSR = mode === 'ssr';
 
@@ -26,7 +19,7 @@ export default defineConfig(({ mode }) => {
       tsconfigPaths(),
     ],
     build: {
-      outDir: isSSR ? 'dist/server' : 'public',  // Asegura que el cliente esté en `public` para Vercel
+      outDir: isSSR ? 'dist/server' : 'dist/client',  // Usa `dist` como directorio común para cliente y servidor
       assetsInlineLimit: 0,
       rollupOptions: {
         input: isSSR ? './app/entry.server.jsx' : './app/entry.client.jsx',
