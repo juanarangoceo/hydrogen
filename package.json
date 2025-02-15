@@ -4,12 +4,14 @@
   "sideEffects": false,
   "version": "2025.1.1",
   "type": "module",
-  "scripts": {
-  "build": "shopify hydrogen build --codegen",
+ "scripts": {
+  "build": "shopify hydrogen build --codegen && cp -R dist/client/* public/",
   "dev": "shopify hydrogen dev --codegen",
   "preview": "shopify hydrogen preview --build",
   "lint": "eslint --no-error-on-unmatched-pattern .",
   "codegen": "shopify hydrogen codegen"
+
+
 },
   "prettier": "@shopify/prettier-config",
   "dependencies": {

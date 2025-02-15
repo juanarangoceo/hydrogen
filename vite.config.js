@@ -5,8 +5,8 @@ import { vitePlugin as remix } from '@remix-run/dev';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 
-export default defineConfig(({ command, mode }) => {
-  const isSSR = mode === 'ssr'; // Detecta si es SSR para construir cliente y servidor por separado
+export default defineConfig(({ mode }) => {
+  const isSSR = mode === 'ssr';
 
   return {
     plugins: [
@@ -26,13 +26,14 @@ export default defineConfig(({ command, mode }) => {
       tsconfigPaths(),
     ],
     build: {
-      outDir: isSSR ? 'dist/server' : 'dist/client', // Salida diferente para SSR y cliente
-      assetsInlineLimit: 0, // Permite aplicar políticas de seguridad de contenido estrictas
+      outDir: isSSR ? 'dist/server' : 'public',  // Asegura que el cliente esté en `public` para Vercel
+      assetsInlineLimit: 0,
       rollupOptions: {
-        input: isSSR ? './app/entry.server.jsx' : './app/entry.client.jsx', // Corrige la ruta para app
+        input: isSSR ? './app/entry.server.jsx' : './app/entry.client.jsx',
       },
     },
     ssr: {
+      target: 'node',
       optimizeDeps: {
         include: [],
       },
